@@ -1,5 +1,5 @@
 # DiCE
-## Version: V1.1.2
+## Version: V1.1.3
 
 ## Disease Biomarker Identification with scRNA-seq Data
 
