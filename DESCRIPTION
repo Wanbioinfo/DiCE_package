@@ -1,0 +1,37 @@
+Package: DiCE
+Type: Package
+Title: DiCE - Differential centrality-ensemble analysis based on gene expression profiles and protein-protein interaction network
+Version: 1.1.3
+Authors@R: c(
+	person("Sandali", "Lokuge", email = "sdlokuge@iu.edu", role = c("aut", "cre")),
+    person("Elnaz", "Pashei", role = "aut"),
+    person("Jun", "Wan", role = "aut"))
+Description: Identifies candidate gene biomarkers from transcriptomic data using a multi-phase approach combining differential expression, information gain, and network centrality analysis.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
+Imports:
+    dplyr,
+    tibble,
+    purrr,
+    parallel,
+    data.table,
+    igraph,
+    FSelectorRcpp,
+    NetWeaver,
+    zinbwave,
+    SingleCellExperiment,
+    SummarizedExperiment,
+    AnnotationDbi,
+    annotate,
+    org.Hs.eg.db,
+    org.Mm.eg.db,
+    BiocParallel,
+    stats,
+    utils,
+    openxlsx,
+    readxl,
+    praznik
+Depends:
+    R (>= 4.0.0)
