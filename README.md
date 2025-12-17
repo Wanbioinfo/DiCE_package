@@ -181,6 +181,10 @@ modules <- detect_DiCE_PPI_unweightedModules(
 head(modules$membership_df)
 
 ```
+### Notes
+
+- Large external reference datasets (e.g., STRING DB interaction files) are intentionally excluded from the repository and should be downloaded programmatically during runtime.
+
 
 ### Last update - 12/05/2025
 
