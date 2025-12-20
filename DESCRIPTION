@@ -4,7 +4,7 @@ Title: DiCE - Differential centrality-ensemble analysis based on gene expression
 Version: 1.1.3
 Authors@R: c(
 	person("Sandali", "Lokuge", email = "sdlokuge@iu.edu", role = c("aut", "cre")),
-    person("Elnaz", "Pashei", role = "aut"),
+    person("Sheng", "Liu", role = "aut"),
     person("Jun", "Wan", role = "aut"))
 Description: Identifies candidate gene biomarkers from transcriptomic data using a multi-phase approach combining differential expression, information gain, and network centrality analysis.
 License: MIT
