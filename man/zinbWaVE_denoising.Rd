@@ -5,23 +5,42 @@
 \title{Denoise Raw Gene Expression Using ZINB-WaVE}
 \usage{
 zinbWaVE_denoising(
-  dge_file,
-  rawGeneExp_file,
-  loose_criteria,
-  loose_cutoff,
-  logFC_cutoff
+  dge_file = NULL,
+  rawGeneExp_file = NULL,
+  loose_criteria = "adj.P.Val",
+  loose_cutoff = 0.05,
+  logFC_cutoff = 0,
+  min_count = 1,
+  min_cells = 1,
+  K = 5,
+  maxIters = 100,
+  workers = 4
 )
 }
 \arguments{
-\item{dge_file}{Path to the '.rds' file containing the differential gene expression data. The columns must include: "Gene.Name", "logFC", "P.Value", "adj.P.Val".}
+\item{dge_file}{Path to the '.rds' file containing the differential gene expression data. The columns must include: "Gene.Symbol", "logFC", "P.Value", "adj.P.Val".}
 
 \item{rawGeneExp_file}{Path to the '.rds' file with raw gene expression data (cells x genes + label column).}
 
 \item{loose_criteria}{Statistical significance metric used for initial gene filtering ("P.Value" or "adj.P.Val"). Default "adj.P.Val".}
 
-\item{loose_cutoff}{Numeric threshold for filtering based on 'loose_criteria'. Genes with values ≤ this cutoff are retained.}
+\item{loose_cutoff}{Numeric threshold for filtering based on 'loose_criteria'. Genes with values ≤ this cutoff are retained. Default 0.05.}
 
-\item{logFC_cutoff}{Minimum absolute log2 fold change threshold for retaining genes.}
+\item{logFC_cutoff}{Minimum absolute log2 fold change threshold for retaining genes. Default 0.}
+
+\item{min_count}{Minimum count threshold to retain a gene.
+Genes must have counts >= \code{min_count} in at least
+\code{min_cells} cells.}
+
+\item{min_cells}{Minimum number of cells required for a gene
+to be retained.}
+
+\item{K}{Number of latent factors to estimate in ZinbWave
+Must be >= 1. Default is 5.}
+
+\item{maxIters}{Maximum number of iterations for the optimization step (default 100).}
+
+\item{workers}{Number of parallel workers to use in ZinbWave. Default is 4.}
 }
 \value{
 A denoised expression matrix (as a matrix or SingleCellExperiment object) with selected genes and cell labels, processed using the ZINB-WaVE model.

@@ -7,23 +7,33 @@
 perform_DiCE(
   data_type = "bulkRNA-seq",
   species = "human",
-  dge_file_path,
-  normGeneExp_file_path,
-  rawGeneExp_file_path,
-  treatment,
-  control,
+  dge_file_path = NULL,
+  normGeneExp_file_path = NULL,
+  rawGeneExp_file_path = NULL,
+  metadata_file_path = NULL,
+  treatment = NULL,
+  control = NULL,
+  remove_pc_genes = TRUE,
   loose_criteria = "adj.P.Val",
   loose_cutoff = 0.05,
   logFC_cutoff = 0,
-  is_wIG_needed = "no",
+  ig_method = "IG",
   B = 300,
   ig_cutoff = "all_mean",
-  norm_type = "logNorm",
+  ig_custom_cutoff = NULL,
   corr_mode = "directCorr",
+  n_denoise_latent = 5,
+  max_denoise_iters = 100,
   corr_method = "pearson",
+  corr_pval_cutoff = 1,
+  ppi_db = "stringdb",
+  stringDB_confidence = 400,
   centrality_list = c("betweenness", "eigen vector"),
-  min_passCount = length(centrality_list),
-  cutoff = "mean"
+  dice_rules = list(dice_centrality_rule(metric = "betweenness", threshold_type =
+    "percent", threshold = 25), dice_centrality_rule(metric = "eigen vector",
+    threshold_type = "percent", threshold = 25)),
+  dice_logic = "AND",
+  markTF = FALSE
 )
 }
 \arguments{
@@ -31,15 +41,19 @@ perform_DiCE(
 
 \item{species}{"human" or "mouse". Default "human".}
 
-\item{dge_file_path}{File path to the differential gene expression '.Rds' file. The columns must include: "Gene.Name", "logFC", "P.Value", "adj.P.Val".}
+\item{dge_file_path}{File path to the differential gene expression Rds/xlsx/csv/tsv file. The columns must include: "Gene.Symbol", "logFC", "P.Value", "adj.P.Val".}
 
-\item{normGeneExp_file_path}{File path for the normalized gene expression '.Rds' file (cells/samples x genes + label column).}
+\item{normGeneExp_file_path}{File path for the normalized gene expression Rds/xlsx/csv/tsv file (genes x samples/cells; make sure genes are under "Gene.Symbol" column).}
 
-\item{rawGeneExp_file_path}{File path for the raw UMI counts '.Rds' file (only needed when data_type = "scRNA-seq"). (cells x genes + label column)}
+\item{rawGeneExp_file_path}{File path for the raw UMI counts Rds/xlsx/csv/tsv file (only needed when data_type = "scRNA-seq"). (genes x samples/cells; make sure genes are under "Gene.Symbol" column)}
+
+\item{metadata_file_path}{Path to sample/cell metadata file (Rds/xlsx/csv/tsv). Must contain "Sample" or "Cell" and 'Phenotype' columns.}
 
 \item{treatment}{Label of treatment samples (e.g., "Tumor").}
 
 \item{control}{Label of control samples (e.g., "Normal").}
+
+\item{remove_pc_genes}{If TRUE, protein-coding genes are removed from the input data before analysis. Default TRUE.}
 
 \item{loose_criteria}{Statistical significance metric used for initial gene filtering ("P.Value" or "adj.P.Val"). Default "adj.P.Val".}
 
@@ -47,7 +61,13 @@ perform_DiCE(
 
 \item{logFC_cutoff}{Minimum absolute log2 fold change threshold for retaining genes. Default 0.}
 
-\item{is_wIG_needed}{Whether to compute weighted IG. Options: "yes"/TRUE or "no"/FALSE. Default is "no"/FALSE.}
+\item{ig_method}{Character string specifying the Information Gain strategy to use. Options are:
+\describe{
+  \item "IG" – Standard information gain
+  \item "wIG" – Weighted information gain
+  \item "none" – Skip information gain filtering
+}
+Default is "IG".}
 
 \item{B}{Number of bootstrap resamples used in weighted IG calculation. Default is 300.}
 
@@ -56,62 +76,117 @@ perform_DiCE(
   \item{"all_mean"}{Retain all genes with IG greater than the mean IG computed across all genes (including zeros). This is the standard mean-based filter. (Default)}
   \item{"all_median"}{Retain all genes with IG greater than the median IG computed across all genes (including zeros). More robust than the mean for extremely skewed IG distributions.}
   \item{"nonzero_mean"}{Compute the mean IG only among genes with IG > 0, and retain genes whose IG exceeds this non-zero mean threshold. Useful when IG has many exact zeros.}
-  \item{nonzero_median}{Compute the median IG only among genes with IG > 0, and retain genes whose IG exceeds this non-zero median threshold. Ideal when IG is sparse and strongly right-skewed.}
-  \item{all_nonzero}{Retain all genes with IG > 0. This keeps every gene carrying information with respect to the class label and excludes only those with zero information gain.}
+  \item{"nonzero_median"}{Compute the median IG only among genes with IG > 0, and retain genes whose IG exceeds this non-zero median threshold. Ideal when IG is sparse and strongly right-skewed.}
+  \item{"all_nonzero"}{Retain all genes with IG > 0. This keeps every gene carrying information with respect to the class label and excludes only those with zero information gain.}
+  \item{"custom"}{Retain genes with IG greater than a user-defined threshold specified in \code{ig_custom_cutoff}}.
 }}
 
-\item{norm_type}{Type of the gene expression normalization ("logNorm" OR "ZINBWaVE_denoised"). Default "logNorm".}
+\item{ig_custom_cutoff}{Numeric IG threshold used only when \code{ig_cutoff = "custom"}.}
 
 \item{corr_mode}{Mode for computing gene–gene correlation. Options are:
 \describe{
   \item{"directCorr"}{Use raw or normalized expression values without dropping zero-expression cells. (Default)}
-  \item{"remove_Zerocells"}{Exclude cell pairs where both genes have zero expression before computing correlation.}
-  \item{"ZINB-WaVE"}{Apply ZINB-WaVE denoising before computing correlation.}
+  \item{"remove_zerocells"}{Exclude cell pairs where both genes have zero expression before computing correlation.}
+  \item{"zinbwave"}{Apply Zinb-Wave model for gene expression denoising before computing correlation (for scRNA-seq data).}
+  \item{"newwave"}{Apply NewWave model for gene expression denoising before computing correlation (for scRNA-seq data).}
 }}
 
+\item{n_denoise_latent}{Number of latent factors used for single-cell normalization (K in zinbwave/newwave models). Default is 5.}
+
+\item{max_denoise_iters}{Maximum number of iterations for the optimization step in denosing models (maxiter_optimize in zinbwave/newwave models). Default is 100).}
+
 \item{corr_method}{Correlation method ("pearson" OR "spearman"). Default "pearson".}
+
+\item{corr_pval_cutoff}{P-value threshold (default 1, no filtering); correlations with p-value > cutoff are set to 0.}
+
+\item{ppi_db}{Database name for the PPI network. "stringdb" or "biogrid". Default is "stringdb".}
+
+\item{stringDB_confidence}{Cutoff for confidence score in Stringdb PPI (Default is 400).}
 
 \item{centrality_list}{Character vector of centrality metrics to compute.
 Valid options include: "betweenness", "eigen vector", "pagerank", "closeness", "harmonic", "authority", "strength". 
 (Names are normalized internally.)}
 
-\item{min_passCount}{Minimum number of centrality metrics a gene must pass to be retained. Default is the length of \code{centrality_list}.}
+\item{dice_rules}{A list of DiCE selection rules used to classify genes as final DiCE genes after ensemble ranking.
 
-\item{cutoff}{Method for selecting final candidate genes based on centrality metrics ("mean", "median", or "topK\%" such as "top10\%", "top25\%"). Default "mean".}
+Each rule must be created using helper functions such as
+\code{dice_centrality_rule()} or \code{dice_ensemble_rule()}.
+
+For a centrality rule, a gene passes if its centrality value is within the
+top specified cutoff in either the treatment network or the control network.
+For an ensemble rule, a gene passes if its \code{Ensemble_Rank} is within
+the specified cutoff.
+
+Example:
+\preformatted{
+dice_rules = list(
+  dice_centrality_rule(
+    metric = "betweenness",
+    threshold_type = "percent",
+    threshold = 25
+  ),
+  dice_ensemble_rule(
+    threshold_type = "rank",
+    threshold = 200
+  )
+)
+}}
+
+\item{dice_logic}{Character string specifying how multiple \code{dice_rules}
+are combined to determine final DiCE genes. Must be either \code{"AND"} or
+\code{"OR"}.
+
+If \code{"AND"}, a gene must satisfy all rules.
+If \code{"OR"}, a gene must satisfy at least one rule.
+
+If only one rule is provided in \code{dice_rules}, \code{dice_logic} has no
+practical effect.}
+
+\item{markTF}{If TRUE, transcription factor genes will be marked. Default FALSE.}
 }
 \value{
-A data frame containing the final DiCE-ranked genes with:
-  \itemize{
-    \item Centrality values across metrics
-    \item Ensemble ranking score
-    \item IG or weighted IG
-    \item Differential expression statistics
+A named list containing:
+\describe{
+  \item{dice_results_df}{A data frame of final DiCE-ranked genes, including: Network centrality values across selected metrics, Ensemble ranking score,
+  Information Gain (IG) or Weighted Information Gain (WIG), if applicable, Differential expression statistics (e.g., logFC, p-value, adjusted p-value),
+  Transcription factor gene annotation, if applicable.}
+  \item{interactions_df}{
+  A data frame of protein–protein interactions used to construct the network,
+  including interaction pairs and their corresponding edge weights
+  (absolute correlation coefficients).
   }
+  \item{phase2_denoised_geneExp}{
+  Returned only when \code{data_type = "scRNA-seq"}.
+  A filtered denoised gene expression matrix used for Phase II
+  network construction and correlation analysis.
+  }
+}
 }
 \description{
 This function runs the DiCE pipeline for gene biomarker identification from transcriptomic data using differential expression, feature selection, and network-based centrality metrics.
 }
 \examples{
 \dontrun{
-dice_results_df <- perform_DiCE(
+dice_results <- perform_DiCE(
   data_type = "bulkRNA-seq",
   dge_file_path = "path/to/dge_results.rds",
   normGeneExp_file_path = "path/to/logNorm_geneExp.rds",
+  metadata_file_path = "path/to/metadata.rds",
   treatment = "Tumor",
   control = "Normal",
   loose_criteria = "adj.P.Val",
   loose_cutoff = 0.05,
   logFC_cutoff = 1,
   species = "human",
-  is_wIG_needed = "yes",
+  ig_method = "IG",
   B = 200,
   ig_cutoff = "nonzero_mean",
-  norm_type = "logNorm",
   corr_mode = "directCorr",
   corr_method = "pearson",
-  cutoff = "mean"
+  corr_pval_cutoff = 0.05,
+
 )
-head(dice_results_df)
+head(dice_results$dice_results_df)
 }
 
 }
