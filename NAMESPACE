@@ -2,6 +2,8 @@
 
 export(detect_PPI_unweightedModules)
 export(detect_PPI_weightedModules)
+export(dice_centrality_rule)
+export(dice_ensemble_rule)
 export(newWave_denoising)
 export(perform_DiCE)
 export(zinbWaVE_denoising)

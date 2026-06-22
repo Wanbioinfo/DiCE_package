@@ -10,7 +10,7 @@
 #'   \code{threshold_type = "mean"}.
 #'
 #' @return A list defining one centrality-based DiCE rule.
-#' @noRd
+#' @export
 dice_centrality_rule <- function(metric,
                                  threshold_type = c("percent", "rank", "mean"),
                                  threshold = NULL) {
@@ -37,7 +37,7 @@ dice_centrality_rule <- function(metric,
 #' @param threshold Numeric cutoff value for the ensemble rank.
 #'
 #' @return A list defining one ensemble-based DiCE rule.
-#' @noRd
+#' @export
 dice_ensemble_rule <- function(threshold_type = c("percent", "rank"),
                                threshold) {
   threshold_type <- match.arg(threshold_type)
@@ -232,9 +232,9 @@ apply_dice_rules <- function(dice_results_df, dice_rules, dice_logic = c("AND", 
   dice_results_df$Phase[dice_results_df$DiCE_pass] <- "DiCE"
   
   last_rank_col <- tail(grep("_rank$", names(dice_results_df), value = TRUE), 1)
-  
+
   dice_results_df <- dice_results_df %>%
-    dplyr::select(-DiCE_pass) %>%
+    select(-DiCE_pass) %>%
     relocate(Pass_Rules, Pass_Count, .after = all_of(last_rank_col))
   
   return(dice_results_df)
