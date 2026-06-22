@@ -203,7 +203,9 @@ perform_DiCE <- function(
     string_ppi_file <- system.file("extdata/stringDB_v12/human/9606.protein.links.v12.0.txt.gz", package = "DiCE")
     
     biogrid_ppi_file <- system.file("extdata/biogrid/human/BIOGRID-ORGANISM-Homo_sapiens-5.0.257.tab.txt.gz", package = "DiCE")
-    
+
+    tf_file <- system.file("extdata/TFs/uniprotkb_keyword_KW_0805_AND_organism_human.xlsx", package = "DiCE")
+      
     taxonID <- 9606
     
   }else if(tolower(species) == "mouse"){
@@ -211,6 +213,8 @@ perform_DiCE <- function(
     string_ppi_file <- system.file("extdata/stringDB_v12/mouse/10090.protein.links.v12.0.txt.gz", package = "DiCE")
     
     biogrid_ppi_file <- system.file("extdata/biogrid/mouse/BIOGRID-ORGANISM-Mus_musculus-5.0.257.tab.txt.gz", package = "DiCE")
+
+    tf_file <- system.file("extdata/TFs/uniprotkb_keyword_KW_0805_AND_organism_mouse.xlsx", package = "DiCE")
     
     taxonID = 10090
     
