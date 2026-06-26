@@ -102,7 +102,7 @@ Configure the parameters based on your application:
 	- "directCorr" : Use raw or normalized expression values without dropping zero-expression cells. Computes correlation directly. (Default)
 	- "remove_zerocells" : Exclude cell pairs where both genes have zero expression before computing correlation. Useful for sparse data. (For scRNAseq data).
 	- "zinbwave" : Apply ZINB-WaVE denoising to model zero inflation and overdispersion before computing correlation. (For scRNAseq data). 
-	- "NewWave" : Apply NewWave denoising to model zero inflation and overdispersion before computing correlation. (For scRNAseq data). 
+	- "newwave" : Apply NewWave denoising to model zero inflation and overdispersion before computing correlation. (For scRNAseq data). 
 - **n_denoise_latent** : Number of latent factors used for single-cell normalization (K in zinbwave/newwave models). Default is 5.
 - **max_denoise_iters** : Maximum number of iterations for the optimization step in denosing models (maxiter_optimize in zinbwave/newwave models). Default is 100).
 - **corr_method** : "pearson" OR "spearman". Default is "pearson".
