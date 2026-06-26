@@ -263,7 +263,7 @@ perform_DiCE <- function(
       
     }
     
-    if (!(corr_mode %in% c("ZINB-WaVE", "NewWave"))) {
+    if (!(corr_mode %in% c("zinbwave", "NewWave"))) {
       
       if (is.null(normGeneExp_file_path) || !file.exists(normGeneExp_file_path)) {
         stop("Invalid or missing 'normGeneExp_file_path' when ig_method is 'ig' or 'wig'.")
