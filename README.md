@@ -60,7 +60,7 @@ If you are running DiCE on **scRNA-seq** data, you need the following four input
   - Do not place sample names as the first column
 
 4. **Meta data** – Rds/xlsx/csv/tsv file containing the cell information.
-  - Samples as rows. 
+  - Cells as rows. 
   - Must contain:
     **cell_id** column matching sample names in the expression matrix
     **phenotype** column containing group/class labels. Example: If a sample is from a tumor tissue, the Group column should contain “Tumor”.
